@@ -280,3 +280,15 @@ footer{padding:36px var(--pad) 48px;text-align:center;font-size:13px;color:#A8A8
 h2.long{font-size:clamp(25px,3.6vw,54px)}
 .rowh button{white-space:nowrap;flex:none}
 @media (max-width:620px){.bars .nm{width:122%;font-size:7.5px}}
+
+/* ── opening on portrait screens: a cover crop would keep only the middle strip of the clip,
+      so the clip sits as a wide band across the top, almost uncropped, and the title goes under it ── */
+@media (max-aspect-ratio:4/5){
+  .hero-card video{inset:auto;top:52px;left:50%;width:118vw;height:66.4vw;translate:-50% 0;scale:1;
+    -webkit-mask-image:linear-gradient(#000 80%,transparent);mask-image:linear-gradient(#000 80%,transparent)}
+  .hero-shade{background:linear-gradient(180deg,rgba(0,0,0,.35) 0,rgba(0,0,0,0) 70px)}
+  .hero-text{justify-content:flex-start;padding-top:calc(52px + 66.4vw + 6px)}
+  .hero h1{font-size:clamp(46px,14vw,96px)}
+  .hero-sub{margin-top:14px}.hero-authors{margin-top:18px}.hero-btns{margin-top:22px}
+}
+@media (max-aspect-ratio:4/5) and (max-height:740px){.hero-foot{display:none}}
