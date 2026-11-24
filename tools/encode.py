@@ -41,7 +41,7 @@ add('m_chain',A+'tabletop_chain.mp4',0,None,1,'scale=448:448',10,22)
 add('m_point',A+'tabletop_chain.mp4',3,4.1,.5,'scale=448:448',10,22); add('m_pick',A+'tabletop_chain.mp4',3.8,5,.5,'scale=448:448',10,22)
 add('m_replan',A+'stacking_replan.MP4',275.5,285.75,1,'scale=960:540')
 add('m_arch',SUB+'Atomic Policy - supplementary material/Atomic Policy - video.mp4',82.05,114.2,1,'scale=1920:1080',30,23)
-add('hero',SUB+'video/stacking/MVI_5261_stacking_zoomin_human.mp4',0,None,60,"scale=1600:900,curves=all='0/0 0.25/0.37 0.5/0.68 0.75/0.88 1/1',colorbalance=rm=-.035:bm=.04:rh=-.03:bh=.035,eq=saturation=1.12",30,23)  # graded: midtones lifted, warm cast eased
+add('hero',SUB+'video/crossword/MVI_5133_crossword_atomic_success_aligned.MP4',0,None,25,"crop=iw/1.35:ih/1.35:0:ih*0.25,hqdn3d=2:1.5:0:0,scale=1920:1080:flags=lanczos,cas=0.7,unsharp=7:7:0.6:5:5:0,curves=all='0/0 0.25/0.36 0.5/0.67 0.75/0.87 1/0.985',colorbalance=rm=-.03:gm=.02:rh=-.03:gh=.02,eq=saturation=1.12",30,24)  # framed on the board and letter cubes; sharpened (the source is soft), midtones lifted, pink cast eased
 def run(j):
     name,src,i,o,sp,vf,fps,crf=j; out=os.path.join(OUT,name+'.mp4'); jpg=os.path.join(OUT,name+'.jpg')
     if not os.path.exists(out):
