@@ -33,7 +33,7 @@ video,img{display:block;max-width:100%}
 .hero-card{--p:0;position:absolute;inset:0;overflow:hidden;background:#0c0c0e;
   clip-path:inset(calc(var(--p)*9vh) calc(var(--p)*7vw) round calc(var(--p)*30px))}
 .hero-card video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;scale:calc(1.06 - var(--p)*.06);animation:heroIn 2.4s var(--ease) both}
-@keyframes heroIn{from{opacity:0;filter:blur(14px) brightness(.6)}to{opacity:1;filter:brightness(1.28) contrast(.97)}}
+@keyframes heroIn{from{opacity:0;filter:blur(14px) brightness(.6)}to{opacity:1;filter:none}}
 .hero-shade{position:absolute;inset:0;background:
   radial-gradient(120% 90% at 50% 50%,rgba(0,0,0,.08),rgba(0,0,0,.26) 100%),
   linear-gradient(180deg,rgba(0,0,0,.3) 0%,rgba(0,0,0,0) 24%,rgba(0,0,0,0) 62%,rgba(0,0,0,.42) 100%);
