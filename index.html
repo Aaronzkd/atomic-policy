@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atomic Policy: Composing Atomic Manipulation Skills with Agentic Reasoning</title>
+<meta name="description" content="Atomic Policy composes learned manipulation skills through grounded steering and execution feedback: a VLM and a PDDL solver plan, a pointing model grounds, a policy executes, and a checker verifies each phase.">
+<link rel="stylesheet" href="css/site.css">
+</head>
+<body>
+
+<nav id="nav">
+  <a class="brand" href="#top">Atomic Policy</a>
+  <div class="links">
+    <a href="#method">Method</a>
+    <a href="#sim">Simulation</a>
+    <a href="#real">Real robot</a>
+    <a href="#video">Video</a>
+  </div>
+</nav>
+
+<!-- ───────────── Opening: full-bleed stacking video, title rises over it ───────────── -->
+<header id="top" class="hero">
+  <div class="hero-pin">
+    <div class="hero-card">
+      <video id="hero-video" autoplay muted playsinline poster="media/hero.jpg" src="media/hero.mp4"></video>
+      <div class="hero-shade"></div>
+      <div class="hero-text">
+        <p class="hero-eyebrow">Paper under review</p>
+        <h1>Atomic Policy</h1>
+        <p class="hero-sub">Composing Atomic Manipulation Skills<br>with Agentic Reasoning</p>
+        <p class="hero-authors">
+          <span>Kaidi Zhang<sup>*</sup></span><span>Pengyuan Guo<sup>*</sup></span><span>Zhengtong Xu<sup>*</sup></span><span>Caiyi Zhang</span><span>Huayi Gou</span><span>Guanlin Huang</span><span>Aaron Lim</span><span>Anas Rafei</span><span>Yu She</span>
+        </p>
+        <p class="hero-aff">Purdue University <i><sup>*</sup>Equal contribution</i></p>
+        <div class="hero-btns">
+          <a class="btn" href="#method">Method</a>
+          <a class="btn" href="#sim">Results</a>
+          <a class="btn" href="#video">Video</a>
+          <span class="btn off">Paper · soon</span>
+          <span class="btn off">Code · soon</span>
+        </div>
+      </div>
+      <div class="hero-foot"><span>Real Franka Panda · Stacking · 50×</span><span class="scroll-hint">Scroll<i></i></span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ───────────── Title page (film s05) ───────────── -->
+<section class="scene center" id="intro">
+  <div class="wrap narrow">
+    <p class="pre" data-r>We propose</p>
+    <h2 class="big" data-r style="--d:.15s">Atomic Policy</h2>
+    <p class="lead" data-r style="--d:.35s">Composing atomic manipulation skills with agentic reasoning.</p>
+    <div class="loopwords" data-r style="--d:.6s">
+      <span class="blue">Plan.</span> <span class="green">Ground.</span> <span class="yellow">Execute.</span> <span class="orange">Check.</span> <span class="mute">Repeat.</span>
+    </div>
+    <p class="abstract" data-r style="--d:.75s">Long-horizon manipulation requires robots to translate task intent into physical interactions as the scene changes. Vision-language models (VLMs) offer semantic and spatial reasoning, while visuomotor policies provide fine-grained control. Yet ambiguous goals and dependencies between actions make their integration challenging. We introduce <b>Atomic Policy</b>, a framework that composes learned manipulation skills through grounded steering and execution feedback. A VLM estimates the symbolic state and goal, and a PDDL solver constructs a skill plan. An agentic harness steers each skill through language, visual pointing, or both, and verifies its outcome to guide phase transitions and replanning. A common phase-level interface supports specialized policies and generalist action models. Experiments in simulation and on a real robot show how Atomic Policy improves task following and supports recovery in complex, long-horizon manipulation.</p>
+  </div>
+</section>
+
+<!-- ───────────── Method ───────────── -->
+<div id="method"></div>
+
+<!-- s06 · atomic skills -->
+<section class="scene" id="skills">
+  <div class="wrap two">
+    <div>
+      <span class="tag bg-yellow" data-r="fade">ATOMIC SKILLS</span>
+      <h2 data-r style="--d:.1s">A task is decomposed to a chain of atomic skills.</h2>
+      <p class="quote" data-r style="--d:.3s">“Put the purple cube in the drawer and close it.”</p>
+      <div class="chain" id="chain">
+        <span class="chip" data-r="pop" style="--d:.50s">grasp handle</span><span class="arrow" data-r="pop" style="--d:.56s">→</span>
+        <span class="chip" data-r="pop" style="--d:.62s">open</span><span class="arrow" data-r="pop" style="--d:.68s">→</span>
+        <span class="chip" data-r="pop" style="--d:.74s">pick purple cube</span><span class="arrow" data-r="pop" style="--d:.80s">→</span>
+        <span class="chip" data-r="pop" style="--d:.86s">place in drawer</span><span class="arrow" data-r="pop" style="--d:.92s">→</span>
+        <span class="chip" data-r="pop" style="--d:.98s">grasp handle</span><span class="arrow" data-r="pop" style="--d:1.04s">→</span>
+        <span class="chip" data-r="pop" style="--d:1.10s">close</span>
+      </div>
+      <p class="sub" data-r style="--d:1.2s">Each skill is reusable and has its own completion condition.<br>The same <b>grasp</b> opens and closes the drawer.</p>
+    </div>
+    <figure class="media sq" data-r="fade" style="--d:.2s">
+      <div class="frame"><video id="v-chain" data-auto data-hold="1.2" muted playsinline preload="metadata" poster="media/m_chain.jpg" src="media/m_chain.mp4"></video></div>
+      <figcaption class="label">Simulation · Tabletop Manipulation · 8×</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- s07 · planner -->
+<section class="scene" id="planner">
+  <div class="wrap">
+    <span class="tag bg-blue" data-r="fade">PLANNER</span>
+    <h2 data-r style="--d:.1s">A VLM reads the scene.<br>A PDDL solver orders the skills.</h2>
+    <div class="plan">
+      <div class="plan-in">
+        <div class="box" data-r style="--d:.5s"><b>state</b><span>drawer closed</span><span>purple cube on table</span></div>
+        <div class="box" data-r style="--d:.7s"><b>goal</b><span>cube in drawer</span><span>drawer closed</span></div>
+      </div>
+      <div class="arr" data-r="fade" style="--d:1.0s">→</div>
+      <div class="solver" data-r="pop" style="--d:1.1s"><div class="n">PDDL solver</div><div class="k">preconditions &amp; effects</div></div>
+      <div class="arr" data-r="fade" style="--d:1.4s">→</div>
+      <div class="chain small">
+        <span class="chip" data-r="pop" style="--d:1.5s">grasp handle</span><span class="arrow" data-r="pop" style="--d:1.6s">→</span>
+        <span class="chip" data-r="pop" style="--d:1.7s">open</span><span class="arrow" data-r="pop" style="--d:1.8s">→</span>
+        <span class="chip" data-r="pop" style="--d:1.9s">pick purple cube</span><span class="arrow" data-r="pop" style="--d:2.0s">→</span>
+        <span class="chip" data-r="pop" style="--d:2.1s">place in drawer</span><span class="arrow" data-r="pop" style="--d:2.2s">→</span>
+        <span class="chip" data-r="pop" style="--d:2.3s">grasp handle</span><span class="arrow" data-r="pop" style="--d:2.4s">→</span>
+        <span class="chip" data-r="pop" style="--d:2.5s">close</span>
+      </div>
+    </div>
+    <p class="sub" data-r style="--d:1.5s">The plan is valid for the estimated state.</p>
+  </div>
+</section>
+
+<!-- s08 · grounder -->
+<section class="scene" id="grounder">
+  <div class="wrap two">
+    <div>
+      <span class="tag bg-green" data-r="fade">GROUNDER</span>
+      <h2 data-r style="--d:.1s">Each skill needs a target.<br>Point to it.</h2>
+      <div class="ground">
+        <div class="bub" id="bub" data-text="Point to the purple cube." data-r="fade" style="--d:.5s">&nbsp;</div>
+        <div class="varr" data-r="fade" style="--d:1.5s">↓</div>
+        <div class="mp" data-r="pop" style="--d:1.7s"><div class="n">MolmoPoint</div><div class="k">pointing VLM · primary-camera image</div></div>
+        <div class="varr" data-r="fade" style="--d:2.1s">↓</div>
+        <div class="formula mono" data-r="pop" style="--d:2.3s"><span class="green">p<sub>k</sub></span> = (x, y) ∈ [0, 1]<sup>2</sup></div>
+      </div>
+      <p class="sub" data-r style="--d:.9s">The point is re-grounded every R control steps, so the skill follows the target as the phase moves.</p>
+    </div>
+    <figure class="media sq" data-r="fade" style="--d:.2s">
+      <div class="frame">
+        <video id="v-point" data-auto data-delay="3000" data-hold="1.6" muted playsinline preload="metadata" poster="media/m_point.jpg" src="media/m_point.mp4"></video>
+        <span class="ring" data-r="ring" style="--d:2.2s"></span>
+        <span class="dot" data-r="dot" style="--d:2.1s"></span>
+        <span class="coord mono" data-r="fade" style="--d:2.4s">p<sub>k</sub> = (0.56, 0.51)</span>
+      </div>
+      <figcaption class="label">Simulation · primary camera · 4×</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- s09 · execute -->
+<section class="scene" id="execute">
+  <div class="wrap">
+    <span class="tag bg-yellow" data-r="fade">EXECUTE</span>
+    <h2 class="long" data-r style="--d:.1s">A policy runs each phase.<br>Steered by a point, a phase instruction, or both.</h2>
+    <p class="leadin" data-r="fade" style="--d:.6s">Instantiated with three policy backbones:</p>
+    <div class="pcs">
+      <div class="pc" data-r="pop" style="--d:.8s"><div class="n">Diffusion Policy</div><div class="k">one specialized policy per skill</div><div class="u">steering input u<sub>k</sub></div><div class="in"><span class="pt"></span>point</div><div class="st">Point steering</div></div>
+      <div class="pc" data-r="pop" style="--d:1.1s"><div class="n">MolmoBot</div><div class="k">generalist VLA</div><div class="u">steering input u<sub>k</sub></div><div class="in"><span class="pt"></span>point<br><span class="lang">“grasp the purple cube and lift it”</span></div><div class="st">Point + Language steering</div></div>
+      <div class="pc" data-r="pop" style="--d:1.4s"><div class="n">π<sub>0.5</sub></div><div class="k">generalist VLA</div><div class="u">steering input u<sub>k</sub></div><div class="in"><span class="lang">“grasp the purple cube and lift it”</span></div><div class="st">Language steering</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- s10 · checker -->
+<section class="scene" id="checker">
+  <div class="wrap two">
+    <div>
+      <span class="tag bg-orange" data-r="fade">CHECKER</span>
+      <h2 data-r style="--d:.1s">The skill moves.<br>The checker watches.</h2>
+      <div class="list" id="checklist">
+        <div class="it" data-r style="--d:.5s"><span class="bx">✓</span>target cube is purple</div>
+        <div class="it" data-r style="--d:.62s"><span class="bx">✓</span>cube is grasped</div>
+        <div class="it" data-r style="--d:.74s"><span class="bx">✓</span>cube is lifted</div>
+      </div>
+      <div class="donechip" id="done">done → next phase</div>
+      <p class="sub" data-r style="--d:.9s">A VLM answers a phase checklist and outputs <b>done</b>, <b>not_done</b>, or <b class="red">replan</b>.</p>
+    </div>
+    <figure class="media sq" data-r="fade" style="--d:.2s">
+      <div class="frame"><video id="v-pick" data-auto data-delay="1400" data-hold="2.4" muted playsinline preload="metadata" poster="media/m_pick.jpg" src="media/m_pick.mp4"></video></div>
+      <figcaption class="label">Simulation · pick phase · 4×</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- s11 · replan -->
+<section class="scene" id="replan">
+  <div class="wrap">
+    <span class="tag bg-red" data-r="fade">REPLAN</span>
+    <h2 data-r style="--d:.1s">When something breaks, replan from what it sees.</h2>
+    <div class="two wide-left">
+      <figure class="media" data-r="fade" style="--d:.2s">
+        <div class="frame r169"><video id="v-replan" data-auto data-hold="2.5" muted playsinline preload="metadata" poster="media/m_replan.jpg" src="media/m_replan.mp4" style="filter:brightness(1.35)"></video><span class="rep" id="rep">replan</span></div>
+        <figcaption class="label">Real Franka Panda · Stacking · 1×</figcaption>
+      </figure>
+      <div class="plans">
+        <div class="kk" data-r="fade" style="--d:.6s">old plan</div>
+        <div class="chain small" id="oldplan">
+          <span class="chip ok" data-r="pop" style="--d:.70s">pregrasp orange</span><span class="arrow" data-r="pop" style="--d:.75s">→</span>
+          <span class="chip ok" data-r="pop" style="--d:.80s">grasp orange</span><span class="arrow" data-r="pop" style="--d:.85s">→</span>
+          <span class="chip ok" data-r="pop" style="--d:.90s">preplace purple</span><span class="arrow" data-r="pop" style="--d:.95s">→</span>
+          <span class="chip ok" data-r="pop" style="--d:1.0s">place purple</span><span class="arrow" data-r="pop" style="--d:1.05s">→</span>
+          <span class="chip" data-r="pop" style="--d:1.10s">pregrasp cyan</span><span class="arrow" data-r="pop" style="--d:1.15s">→</span>
+          <span class="chip" data-r="pop" style="--d:1.20s">grasp cyan</span><span class="arrow" data-r="pop" style="--d:1.25s">→</span>
+          <span class="chip" data-r="pop" style="--d:1.30s">…</span>
+        </div>
+        <div id="newplan" class="newplan">
+          <div class="kk">new plan · from the current scene</div>
+          <div class="chain small">
+            <span class="chip">pregrasp orange</span><span class="arrow">→</span><span class="chip">grasp orange</span><span class="arrow">→</span><span class="chip">preplace orange</span><span class="arrow">→</span><span class="chip">place orange</span><span class="arrow">→</span><span class="chip">pregrasp cyan</span><span class="arrow">→</span><span class="chip">…</span>
+          </div>
+          <p class="sub">The planner re-estimates the state.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- s11b + s12 · one phase step by step → one harness, one loop (the film's own animation) -->
+<section class="scene" id="harness">
+  <div class="wrap">
+    <span class="tag bg-ink" data-r="fade">THE HARNESS</span>
+    <figure class="media arch" data-r style="--d:.15s">
+      <div class="frame flat"><video id="v-arch" data-auto data-hold="2" muted playsinline preload="metadata" poster="media/m_arch.jpg" src="media/m_arch.mp4"></video></div>
+      <figcaption class="label center">Planner, grounder, policy and checker in one phase, then the whole loop · tap to pause</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ───────────── Results ───────────── -->
+<!-- s13 · does it work? -->
+<section class="scene center" id="results">
+  <div class="wrap">
+    <h2 class="xl" data-r>Does it work?</h2>
+    <p class="lead" data-r style="--d:.2s">3 simulated suites · 3 real-robot tasks</p>
+    <div class="thumbs">
+      <a href="#push5" data-r="fade" style="--d:.30s"><span class="frame r169"><video data-auto loop muted playsinline preload="none" poster="media/thumb_push5.jpg" src="media/thumb_push5.mp4"></video></span><b>Push 5 Blocks</b></a>
+      <a href="#tabletop" data-r="fade" style="--d:.38s"><span class="frame r169"><video data-auto loop muted playsinline preload="none" poster="media/thumb_tabletop.jpg" src="media/thumb_tabletop.mp4"></video></span><b>Tabletop Manipulation</b></a>
+      <a href="#molmo" data-r="fade" style="--d:.46s"><span class="frame r169"><video data-auto loop muted playsinline preload="none" poster="media/thumb_molmo.jpg" src="media/thumb_molmo.mp4"></video></span><b>MolmoSpaces · PnP Next-To</b></a>
+      <a href="#drawer" data-r="fade" style="--d:.54s"><span class="frame r169"><video data-auto loop muted playsinline preload="none" poster="media/thumb_drawer.jpg" src="media/thumb_drawer.mp4" style="filter:brightness(1.16)"></video></span><b>Multi-drawer</b></a>
+      <a href="#stacking" data-r="fade" style="--d:.62s"><span class="frame r169"><video data-auto loop muted playsinline preload="none" poster="media/thumb_stacking.jpg" src="media/thumb_stacking.mp4" style="filter:brightness(1.36)"></video></span><b>Stacking</b></a>
+      <a href="#crossword" data-r="fade" style="--d:.70s"><span class="frame r169"><video data-auto loop muted playsinline preload="none" poster="media/thumb_crossword.jpg" src="media/thumb_crossword.mp4" style="filter:brightness(1.3)"></video></span><b>Crossword</b></a>
+    </div>
+  </div>
+</section>
+
+<div id="sim"></div>
+<!-- The result sections below are filled in by js/site.js from one table (same clips, order, captions and marks as the film). -->
+<section class="scene res" id="push5"></section>
+<section class="scene res" id="tabletop"></section>
+<section class="scene res" id="molmo"></section>
+<div id="real"></div>
+<section class="scene res" id="drawer"></section>
+<section class="scene res" id="stacking"></section>
+<section class="scene res" id="crossword"></section>
+
+<!-- s22 · real-robot summary -->
+<section class="scene res" id="summary">
+  <div class="wrap">
+    <span class="tag sm" data-r="fade">REAL ROBOT <i>· Summary</i></span>
+    <h3 class="hd" data-r style="--d:.1s">Ten trials per method, task and condition.</h3>
+    <p class="prompt mute" data-r style="--d:.3s">Task score of every real-robot trial · box: median and interquartile range · whiskers: 1.5 IQR · n = 10</p>
+    <div class="lg" id="box-lg" data-r="fade" style="--d:.5s"></div>
+    <div class="hscroll" data-r="fade" style="--d:.5s">
+      <div class="boxplots" id="boxplots">
+        <div class="rowh">In distribution</div>
+        <svg id="bp1" viewBox="0 0 1700 290"></svg>
+        <div class="rowh">Out of distribution</div>
+        <svg id="bp2" viewBox="0 0 1700 330"></svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────── Full video ───────────── -->
+<section class="scene center" id="video">
+  <div class="wrap">
+    <h2 data-r>The full video</h2>
+    <figure class="media film" data-r style="--d:.3s">
+      <div class="frame r169"><video controls playsinline preload="none" poster="media/film.jpg" src="media/film.mp4"></video></div>
+    </figure>
+  </div>
+</section>
+
+<!-- s23 · closing ring -->
+<section class="scene center" id="closing">
+  <div class="wrap">
+    <div class="ringbox" id="ringbox">
+      <svg id="ring" viewBox="500 80 920 920"></svg>
+      <div class="ringtext"><div class="t1">Atomic Policy</div><div class="t2">Composing atomic manipulation skills with agentic reasoning.</div></div>
+    </div>
+    <div class="bib" data-r>
+      <div class="kk">BibTeX</div>
+<pre id="bibtex">@misc{zhang2026atomic,
+  title  = {Atomic Policy: Composing Atomic Manipulation Skills with Agentic Reasoning},
+  author = {Zhang, Kaidi and Guo, Pengyuan and Xu, Zhengtong and Zhang, Caiyi and Gou, Huayi and Huang, Guanlin and Lim, Aaron and Rafei, Anas and She, Yu},
+  note   = {Under review},
+  year   = {2026}
+}</pre>
+      <button class="copy" id="copy">Copy</button>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>Atomic Policy · Purdue University · paper under review</footer>
+
+<script src="js/site.js"></script>
+</body>
+</html>
