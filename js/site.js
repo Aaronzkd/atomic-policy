@@ -294,7 +294,7 @@ requestAnimationFrame(frame);
 const hero = $('.hero'), heroCard = $('.hero-card'), heroV = $('#hero-video'), nav = $('#nav');
 const anchors = [['#method', '#method'], ['#sim', '#sim'], ['#real', '#real'], ['#video', '#video']].map(([h, s]) => [$(`#nav a[href="${h}"]`), $(s)]);
 let heroHold = false;
-heroV.addEventListener('ended', () => { heroHold = true; setTimeout(() => { heroHold = false; heroV.currentTime = 0; if (scrollY <= hero.offsetHeight) heroV.play().catch(() => {}); }, 2000); });
+heroV.addEventListener('ended', () => { heroHold = true; setTimeout(() => { heroHold = false; heroV.currentTime = 0; if (scrollY <= hero.offsetHeight) heroV.play().catch(() => {}); }, 1000); });
 function onScroll() {
   const vh = innerHeight, y = scrollY, span = hero.offsetHeight - vh;
   heroCard.style.setProperty('--p', easeInOut(clamp01(y / span)).toFixed(4));

@@ -41,7 +41,7 @@ add('m_chain',A+'tabletop_chain.mp4',0,None,1,'scale=448:448',10,22)
 add('m_point',A+'tabletop_chain.mp4',3,4.1,.5,'scale=448:448',10,22); add('m_pick',A+'tabletop_chain.mp4',3.8,5,.5,'scale=448:448',10,22)
 add('m_replan',A+'stacking_replan.MP4',275.5,285.75,1,'scale=960:540')
 add('m_arch',SUB+'Atomic Policy - supplementary material/Atomic Policy - video.mp4',82.05,114.2,1,'scale=1920:1080',30,23)
-add('hero',SUB+'video/stacking/MVI_5261_stacking_zoomin.mp4',0,None,50,'scale=1600:900',30,24)
+add('hero',SUB+'video/stacking/MVI_5261_stacking_zoomin_human.mp4',0,None,60,'scale=1600:900',30,24)
 def run(j):
     name,src,i,o,sp,vf,fps,crf=j; out=os.path.join(OUT,name+'.mp4'); jpg=os.path.join(OUT,name+'.jpg')
     if not os.path.exists(out):
